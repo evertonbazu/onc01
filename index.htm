@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Olimpíada de Ciências</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #0c0a1a;
+            background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.1) 1px, transparent 0);
+            background-size: 20px 20px;
+            touch-action: manipulation;
+            overflow-y: auto;
+        }
+        .main-container {
+            background: linear-gradient(170deg, #1e1b4b 0%, #0c0a1a 100%);
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .option-button {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out, background-color 0.2s;
+            border-bottom-width: 4px;
+        }
+        .option-button:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        .option-button:active {
+            transform: translateY(-1px);
+        }
+        #feedback {
+            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+        }
+        .screen {
+            min-height: 100vh;
+            width: 100%;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+        .video-container { 
+            position: relative; 
+            padding-bottom: 56.25%; 
+            height: 0; 
+            overflow: hidden; 
+            max-width: 100%; 
+            background: #000; 
+            border-radius: 1rem; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2); 
+        }
+        .video-container iframe { 
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+        }
+        .loader {
+            border: 4px solid rgba(255,255,255,0.3);
+            border-top: 4px solid #a78bfa;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="main-container">
+
+    <!-- Tela de Login / Cadastro -->
+    <div id="login-screen" class="screen">
+        <div class="glass-card p-6 sm:p-8 rounded-2xl shadow-xl max-w-md w-full text-center text-white">
+            <div id="login-form">
+                <h1 class="text-3xl sm:text-4xl font-bold text-violet-300">Acessar Jogo</h1>
+                <p class="text-violet-200 mt-4">Digite seu código e senha para entrar.</p>
+                <input type="text" id="login-code" placeholder="Seu código" class="mt-8 w-full text-xl p-3 rounded-xl border-2 border-violet-400 bg-white/10 placeholder-violet-300">
+                <input type="password" id="login-password" placeholder="Sua senha" class="mt-4 w-full text-xl p-3 rounded-xl border-2 border-violet-400 bg-white/10 placeholder-violet-300">
+                <button id="login-button" class="mt-6 w-full bg-gradient-to-r from-purple-500 to-indigo-500 text-white text-2xl font-bold py-3 rounded-xl shadow-lg hover:shadow-purple-500/50 transition flex items-center justify-center option-button border-purple-700">
+                    <span class="button-text">Entrar</span>
+                    <div class="loader hidden ml-3"></div>
+                </button>
+                <p id="login-message" class="text-red-400 mt-4 h-5"></p>
+                <div class="flex space-x-2 mt-2">
+                    <button id="go-to-register" class="w-1/2 text-violet-300 hover:underline">Não tenho cadastro</button>
+                    <button id="view-ranking-button" class="w-1/2 text-violet-300 hover:underline">Ver Ranking</button>
+                </div>
+            </div>
+            <div id="register-form" class="hidden">
+                <h1 class="text-3xl sm:text-4xl font-bold text-violet-300">Criar Cadastro</h1>
+                <p class="text-violet-200 mt-4">Preencha seus dados para criar um acesso.</p>
+                <input type="text" id="register-name" placeholder="Nome Completo" class="mt-8 w-full text-xl p-3 rounded-xl border-2 border-violet-400 bg-white/10 placeholder-violet-300">
+                <select id="register-class" class="mt-4 w-full text-xl p-3 rounded-xl border-2 border-violet-400 bg-white/10 placeholder-violet-300">
+                    <option value="" class="text-black">Selecione sua turma</option>
+                    <option value="5º Ano A" class="text-black">5º Ano A</option>
+                    <option value="5º Ano B" class="text-black">5º Ano B</option>
+                </select>
+                <input type="text" id="register-code" placeholder="Crie um código de acesso" class="mt-4 w-full text-xl p-3 rounded-xl border-2 border-violet-400 bg-white/10 placeholder-violet-300">
+                <input type="password" id="register-password" placeholder="Crie uma senha" class="mt-4 w-full text-xl p-3 rounded-xl border-2 border-violet-400 bg-white/10 placeholder-violet-300">
+                <button id="register-button" class="mt-6 w-full bg-gradient-to-r from-green-500 to-emerald-500 text-white text-2xl font-bold py-3 rounded-xl shadow-lg hover:shadow-green-500/50 transition flex items-center justify-center option-button border-green-700">
+                    <span class="button-text">Cadastrar e Entrar</span>
+                    <div class="loader hidden ml-3"></div>
+                </button>
+                <p id="register-message" class="text-red-400 mt-4 h-5"></p>
+                <button id="back-to-login" class="mt-2 text-violet-300 hover:underline">Já tenho cadastro</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tela do Vídeo -->
+    <div id="video-screen" class="screen hidden">
+        <div class="glass-card p-6 sm:p-8 rounded-2xl shadow-xl max-w-3xl w-full text-center text-white">
+            <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-violet-300">Vamos aprender!</h2>
+            <p class="text-base sm:text-lg text-violet-200 mt-2 mb-4">Assista ao vídeo para revisar e ganhar até 1000 pontos!</p>
+            <div class="mb-4 bg-white/10 rounded-full px-6 py-2 inline-block">
+                <span class="text-2xl font-semibold text-violet-200">Pontos: <span class="score-display">0</span></span>
+            </div>
+            <div class="video-container">
+                <div id="player"></div>
+            </div>
+            <button id="continue-btn" class="mt-8 w-full bg-gradient-to-r from-green-500 to-emerald-500 text-white text-2xl sm:text-3xl font-bold py-3 sm:py-4 rounded-xl shadow-lg transition transform hover:shadow-green-500/50 opacity-50 cursor-not-allowed option-button border-green-700" disabled>
+                Ir para o Jogo!
+            </button>
+            <button id="skip-video-btn" class="mt-2 text-gray-400 hover:text-gray-200 hover:underline">Pular vídeo (não ganha pontos)</button>
+        </div>
+    </div>
+
+    <!-- Tela do Jogo (Quiz) -->
+    <div id="game-screen" class="screen hidden">
+        <div class="w-full max-w-4xl">
+             <header class="text-center mb-4 sm:mb-8 w-full">
+                <div class="flex justify-center items-center w-full">
+                    <div class="glass-card rounded-full px-4 sm:px-6 py-2">
+                        <span class="text-xl sm:text-2xl font-semibold text-violet-200">Pontos: <span class="score-display">0</span></span>
+                    </div>
+                </div>
+                <h1 class="text-3xl sm:text-4xl md:text-5xl font-bold text-white mt-4" style="text-shadow: 0 0 15px rgba(167, 139, 250, 0.7);">
+                    Olimpíada de Ciências
+                </h1>
+                 <p class="text-lg sm:text-xl text-violet-300 mt-2">Olá, <span id="player-firstname"></span>! Escolha a resposta certa.</p>
+            </header>
+            <main class="w-full glass-card p-6 sm:p-8 rounded-2xl shadow-xl text-center">
+                <div id="question-container" class="mb-6 sm:mb-8 text-xl sm:text-2xl md:text-3xl font-semibold text-white min-h-[6rem] flex items-center justify-center">
+                    <!-- A pergunta aparecerá aqui -->
+                </div>
+                <div id="options-container" class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                    <!-- As opções aparecerão aqui -->
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Tela Final (Game Over) -->
+    <div id="end-screen" class="screen hidden">
+        <div class="glass-card p-6 sm:p-8 rounded-2xl shadow-xl max-w-3xl w-full text-center my-8 text-white">
+            <div id="end-screen-content">
+                <h1 class="text-3xl sm:text-4xl font-bold text-violet-300">Fim de Jogo!</h1>
+                <p id="final-message" class="text-lg text-violet-200 mt-4 font-semibold"></p>
+                <p id="bonus-message" class="text-lg text-green-400 mt-2 font-semibold"></p>
+                <div class="flex justify-center items-center my-6 text-violet-200">
+                    <div class="text-xl"><strong>Pontos:</strong> <span id="final-score">0</span></div>
+                </div>
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-bold text-violet-300 mt-6 mb-4">Ranking (Top 100)</h2>
+            <div class="overflow-y-auto h-64 bg-white/5 rounded-lg">
+                <table class="w-full text-left">
+                    <thead class="bg-white/10 sticky top-0">
+                        <tr>
+                            <th class="p-2">#</th>
+                            <th class="p-2">Nome</th>
+                            <th class="p-2">Pontos</th>
+                            <th class="p-2">Turma</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ranking-body">
+                        <tr><td colspan="4" class="p-8 text-center"><div class="loader mx-auto"></div></td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <button id="play-again-button" class="mt-8 w-full bg-gradient-to-r from-yellow-500 to-orange-500 text-white text-2xl sm:text-3xl font-bold py-3 rounded-xl shadow-lg hover:shadow-yellow-500/50 transition option-button border-yellow-700">
+                Jogar Novamente
+            </button>
+            <button id="back-from-ranking-button" class="mt-8 w-full bg-gray-500 text-white text-2xl sm:text-3xl font-bold py-3 rounded-xl shadow-lg hover:bg-gray-600 transition hidden option-button border-gray-700">
+                Voltar
+            </button>
+        </div>
+    </div>
+
+    <div id="feedback" class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 p-6 sm:p-8 rounded-2xl text-white text-2xl font-bold shadow-2xl opacity-0 pointer-events-none w-11/12 max-w-sm text-center"></div>
+    
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <script>
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyvzdtou17UCu8lmOFg9fxVEaLg1FnWcvexCYUZzqNLcUhiE6mZW_OkxeeI874AXZRT/exec';
+        const NOME_DESTE_JOGO = "ONC-5ANO";
+
+        // --- ELEMENTOS DO DOM ---
+        const loginScreen = document.getElementById('login-screen');
+        const videoScreen = document.getElementById('video-screen');
+        const gameScreen = document.getElementById('game-screen');
+        const endScreen = document.getElementById('end-screen');
+        const continueBtn = document.getElementById('continue-btn');
+        const skipVideoBtn = document.getElementById('skip-video-btn');
+        const loginForm = document.getElementById('login-form');
+        const loginCodeInput = document.getElementById('login-code');
+        const loginPasswordInput = document.getElementById('login-password');
+        const loginButton = document.getElementById('login-button');
+        const loginMessage = document.getElementById('login-message');
+        const goToRegisterButton = document.getElementById('go-to-register');
+        const registerForm = document.getElementById('register-form');
+        const registerNameInput = document.getElementById('register-name');
+        const registerClassInput = document.getElementById('register-class');
+        const registerCodeInput = document.getElementById('register-code');
+        const registerPasswordInput = document.getElementById('register-password');
+        const registerButton = document.getElementById('register-button');
+        const registerMessage = document.getElementById('register-message');
+        const backToLoginButton = document.getElementById('back-to-login');
+        const playerFirstNameEl = document.getElementById('player-firstname');
+        const finalMessageEl = document.getElementById('final-message');
+        const viewRankingButton = document.getElementById('view-ranking-button');
+        const backFromRankingButton = document.getElementById('back-from-ranking-button');
+        const playAgainButton = document.getElementById('play-again-button');
+        const endScreenContent = document.getElementById('end-screen-content');
+        const questionContainer = document.getElementById('question-container');
+        const optionsContainer = document.getElementById('options-container');
+        const feedbackEl = document.getElementById('feedback');
+        const bonusMessageEl = document.getElementById('bonus-message');
+
+        // --- ESTADO DO JOGO ---
+        let score = 0;
+        let startTime;
+        let loggedInUser = null;
+        let videoPointsInvalidated = false;
+        let currentQuestionIndex = 0;
+        let shuffledQuestions = [];
+
+        // --- BANCO DE PERGUNTAS COM EXPLICAÇÕES E PONTOS ---
+        const questions = [
+            // Capítulo 1: Fenômenos Físicos e Químicos (10 Pontos)
+            { question: 'A matéria está em tudo ao nosso redor e passa por diversas transformações. Como são chamadas essas transformações, de acordo com a apostila?', options: ['Transições naturais', 'Mudanças elementares', 'Fenômenos', 'Eventos universais'], answer: 'Fenômenos', explanation: 'As transformações que a matéria sofre são chamadas de fenômenos, e existem dois tipos principais: físicos e químicos.', points: 10 },
+            { question: 'Qual é a principal característica de um fenômeno físico?', options: ['A criação de uma substância totalmente nova.', 'A quebra de substâncias originais para formar produtos diferentes.', 'A matéria muda de forma, tamanho ou estado, mas sua composição não muda.', 'A alteração completa da natureza da substância.'], answer: 'A matéria muda de forma, tamanho ou estado, mas sua composição não muda.', explanation: 'Um fenômeno físico é uma transformação onde a matéria muda de forma, tamanho ou estado, mas sua composição e natureza continuam as mesmas.', points: 10 },
+            { question: 'Qual dos exemplos a seguir representa um fenômeno físico?', options: ['A queima de um fósforo.', 'A maçã cortada que fica marrom.', 'A água que vira gelo.', 'O leite que coalha.'], answer: 'A água que vira gelo.', explanation: 'Quando a água no estado líquido é congelada, ela vira água no estado sólido, mas continua sendo água. Isso é uma mudança de estado, um fenômeno físico.', points: 10 },
+            { question: 'Quando rasgamos um papel, o que acontece com a matéria, de acordo com as fontes?', options: ['O papel se transforma em outra substância.', 'O papel muda de cor.', 'O papel libera gás.', 'Cada pedaço continua sendo papel.'], answer: 'Cada pedaço continua sendo papel.', explanation: 'Rasgar um papel é um fenômeno físico; você divide o papel em pedaços, mas cada pedaço continua sendo papel.', points: 10 },
+            { question: 'Um fenômeno químico, também conhecido como reação química, envolve qual tipo de transformação?', options: ['Apenas a mudança de forma ou tamanho da substância.', 'A quebra e reorganização de substâncias para formar algo totalmente novo.', 'A alteração apenas do estado físico da matéria.', 'A dissolução de uma substância em outra sem mudar sua identidade.'], answer: 'A quebra e reorganização de substâncias para formar algo totalmente novo.', explanation: 'Em um fenômeno químico, as substâncias originais (reagentes) se quebram e se reorganizam para formar substâncias totalmente novas (produtos).', points: 10 },
+            { question: 'Qual dos seguintes exemplos do dia a dia é um fenômeno químico?', options: ['Amassar uma lata de alumínio.', 'Derreter gelo em água.', 'Pregos enferrujando.', 'Cortar madeira para fazer serragem.'], answer: 'Pregos enferrujando.', explanation: 'Pregos enferrujando (oxidação) é um processo que altera a composição química do material, formando uma nova substância, sendo, portanto, um fenômeno químico.', points: 10 },
+            { question: 'O que são "reagentes" em um fenômeno químico?', options: ['As novas substâncias formadas após a transformação.', 'As substâncias originais que se quebram e se reorganizam.', 'Os catalisadores que aceleram a reação.', 'Os produtos finais de um experimento.'], answer: 'As substâncias originais que se quebram e se reorganizam.', explanation: 'Em um fenômeno químico, as substâncias originais são chamadas de reagentes, que se quebram e se reorganizam.', points: 10 },
+            { question: 'Um dos sinais de que um fenômeno químico aconteceu é a mudança de cor. Qual exemplo ilustra isso?', options: ['A cor da água que fica azul com corante.', 'A banana amadurecendo e ficando marrom.', 'A tinta secando na parede.', 'O papel colorido sendo rasgado.'], answer: 'A banana amadurecendo e ficando marrom.', explanation: 'A banana amadurecendo e ficando marrom é um exemplo de mudança de cor que sinaliza uma reação química, pois a composição da fruta muda.', points: 10 },
+            { question: 'Quando você coloca um comprimido efervescente na água e vê bolhas subindo, qual sinal de fenômeno químico está sendo observado?', options: ['Formação de um sólido.', 'Liberação de calor.', 'Liberação de gás.', 'Mudança de odor.'], answer: 'Liberação de gás.', explanation: 'As bolhas que saem quando você coloca um comprimido efervescente na água são um sinal claro de liberação de gás, indicando um fenômeno químico.', points: 10 },
+            { question: 'Qual dos seguintes não é um sinal de que um fenômeno químico pode ter ocorrido?', options: ['Liberação de calor ou luz.', 'Formação de um sólido.', 'Mudança de cor.', 'Apenas a mudança de tamanho.'], answer: 'Apenas a mudança de tamanho.', explanation: 'Apenas a mudança de tamanho (como rasgar um papel) é uma característica de um fenômeno físico, onde a natureza da matéria não muda.', points: 10 },
+            { question: 'Quando o leite azeda e forma coalhada, isso é um exemplo de:', options: ['Fenômeno físico, pois só mudou o estado.', 'Fenômeno químico, com formação de um sólido.', 'Fenômeno físico, pois a cor não mudou.', 'Fenômeno químico, com liberação de luz.'], answer: 'Fenômeno químico, com formação de um sólido.', explanation: 'A formação de um sólido, como quando o leite coalha, é um dos sinais de que um fenômeno químico (reação química) aconteceu.', points: 10 },
+            { question: 'Classifique a dissolução do sal na água.', options: ['Fenômeno Químico, pois o sal "desaparece".', 'Fenômeno Físico, pois o sal não perde sua identidade química.', 'Fenômeno Químico, pois há mudança de sabor.', 'Fenômeno Físico, pois o sal se torna um novo composto.'], answer: 'Fenômeno Físico, pois o sal não perde sua identidade química.', explanation: 'A dissolução do sal na água é um fenômeno físico porque as moléculas do sal permanecem intactas, apenas se dispersam na água, e a substância não perde sua identidade química.', points: 10 },
+            { question: 'A fotossíntese realizada pelas plantas é um exemplo de qual tipo de fenômeno?', options: ['Fenômeno Físico, pois a planta apenas cresce.', 'Fenômeno Físico, pois não há mudança de cor.', 'Fenômeno Químico, pois novas substâncias (alimento e oxigênio) são produzidas.', 'Fenômeno Químico, pois há apenas absorção de luz.'], answer: 'Fenômeno Químico, pois novas substâncias (alimento e oxigênio) são produzidas.', explanation: 'A fotossíntese é um fenômeno químico (reação química) onde as plantas produzem seu próprio alimento e oxigênio a partir de gás carbônico e água, formando novas substâncias.', points: 10 },
+            { question: 'Qual é a principal diferença entre um fenômeno físico e um químico?', options: ['Fenômenos físicos são sempre reversíveis, e químicos não.', 'Fenômenos químicos são visíveis, e físicos não.', 'Fenômenos físicos não alteram a natureza da matéria, enquanto fenômenos químicos formam novas substâncias.', 'Fenômenos físicos acontecem apenas na natureza, enquanto químicos são feitos em laboratório.'], answer: 'Fenômenos físicos não alteram a natureza da matéria, enquanto fenômenos químicos formam novas substâncias.', explanation: 'A principal distinção é que fenômenos físicos mudam a aparência ou estado, mas não a composição da matéria, enquanto fenômenos químicos resultam na formação de novas substâncias com propriedades diferentes.', points: 10 },
+            { question: 'Quando um metal é aquecido e derrete, ele passa por qual tipo de transformação?', options: ['Fenômeno Químico, pois o metal muda de estado.', 'Fenômeno Físico, pois o metal continua sendo o mesmo tipo de metal.', 'Fenômeno Químico, pois há liberação de calor.', 'Fenômeno Físico, pois o metal vira outra substância.'], answer: 'Fenômeno Físico, pois o metal continua sendo o mesmo tipo de metal.', explanation: 'O metal que derrete é um fenômeno físico; ele muda de estado (de sólido para líquido), mas continua sendo o mesmo tipo de metal, sem alteração de sua composição química.', points: 10 },
+            // Capítulo 2: A Ciência nos Experimentos (20 Pontos)
+            { question: 'No experimento "O Balão Mágico" (ou Balão Autoinflável), o que acontece quando o vinagre se mistura com o bicarbonato de sódio?', options: ['Uma substância sólida se forma no fundo da garrafa.', 'Ocorre uma mudança de cor na mistura.', 'Uma reação química libera gás carbônico, que infla o balão.', 'O vinagre e o bicarbonato evaporam, enchendo o balão.'], answer: 'Uma reação química libera gás carbônico, que infla o balão.', explanation: 'Quando o vinagre (ácido) e o bicarbonato de sódio (base) se misturam, acontece uma reação química que libera gás carbônico (CO₂), que se expande e enche o balão.', points: 20 },
+            { question: 'O experimento "A Lâmpada de Lava Caseira" demonstra um conceito importante da física. Qual é esse conceito?', options: ['A tensão superficial dos líquidos.', 'A densidade, onde o óleo é menos denso que a água.', 'A capacidade de dissolução do gás carbônico.', 'A atração eletrostática entre as moléculas.'], answer: 'A densidade, onde o óleo é menos denso que a água.', explanation: 'Este experimento se baseia no conceito de densidade. O óleo é menos denso ("mais leve") que a água, por isso flutua por cima.', points: 20 },
+            { question: 'Na Lâmpada de Lava Caseira, as bolhas de gás carbônico produzidas pelo comprimido efervescente "grudam" na água colorida. O que acontece em seguida?', options: ['A água colorida afunda no óleo.', 'O gás carbônico se dissolve na água.', 'A água colorida sobe através do óleo.', 'O óleo e a água se misturam completamente.'], answer: 'A água colorida sobe através do óleo.', explanation: 'As bolhas de gás carbônico "grudam" na água colorida e a levam para cima, através do óleo.', points: 20 },
+            { question: 'Qual material é essencial no "Vulcão de Espuma" para criar a espuma gigante, além do vinagre e bicarbonato?', options: ['Corante de alimento.', 'Água morna.', 'Detergente.', 'Garrafa pet.'], answer: 'Detergente.', explanation: 'No "Vulcão de Espuma", o detergente tem um papel especial: ele age como uma "armadilha" para o gás carbônico, fazendo com que as bolhas fiquem presas e formem uma espuma gigante.', points: 20 },
+            { question: 'No experimento "Pilha de Limão", o que o limão atua?', options: ['Como um condutor de eletricidade.', 'Como um eletrólito.', 'Como um isolante elétrico.', 'Como um metal para gerar elétrons.'], answer: 'Como um eletrólito.', explanation: 'No experimento da Pilha de Limão, o limão atua como eletrólito, permitindo a movimentação de íons e, consequentemente, a geração de corrente elétrica.', points: 20 },
+            { question: 'No experimento "Balão Mágico", o gás invisível que infla o balão é:', options: ['Oxigênio (O₂).', 'Gás carbônico (CO₂).', 'Hidrogênio (H₂).', 'Nitrogênio (N₂).'], answer: 'Gás carbônico (CO₂).', explanation: 'A reação química entre o vinagre e o bicarbonato de sódio libera um gás invisível: o gás carbônico (CO₂), que infla o balão.', points: 20 },
+            { question: 'Qual experimento utiliza um comprimido efervescente para criar um efeito visual?', options: ['O Balão Mágico.', 'O Vulcão de Espuma.', 'A Lâmpada de Lava Caseira.', 'A Pilha de Limão.'], answer: 'A Lâmpada de Lava Caseira.', explanation: 'A Lâmpada de Lava Caseira utiliza um comprimido efervescente para liberar bolhas de gás carbônico, criando o movimento da "lava".', points: 20 },
+            { question: 'Para que serve o corante de alimento na Lâmpada de Lava Caseira?', options: ['Para tornar o óleo mais denso.', 'Para ajudar o gás a subir.', 'Para colorir a água e tornar o efeito visual mais interessante.', 'Para reagir com o comprimido efervescente.'], answer: 'Para colorir a água e tornar o efeito visual mais interessante.', explanation: 'O corante de alimento é adicionado para colorir a água, o que torna o movimento de sobe e desce das bolhas mais visível e o efeito visual da lâmpada de lava mais atraente.', points: 20 },
+            { question: 'No experimento do "Vulcão de Bicarbonato" (Vulcão de Espuma), a equação química simplificada da reação é:', options: ['Ácido + Base → Água + Sal.', 'Ácido + Base → Sal + Água + Gás Carbônico.', 'Ácido + Água → Gás Carbônico + Sal.', 'Base + Gás Carbônico → Sal + Água.'], answer: 'Ácido + Base → Sal + Água + Gás Carbônico.', explanation: 'A explicação científica do vulcão de bicarbonato afirma que a reação química entre o vinagre (ácido) e o bicarbonato de sódio (base) gera ácido carbônico e gás carbônico (CO₂), e a equação simplificada é Ácido + Base → Sal + Água + Gás Carbônico.', points: 20 },
+            { question: 'Qual experimento demonstra como soluções saturadas funcionam e como os cristais se formam?', options: ['Lâmpada de Lava Caseira.', 'Balão Autoinflável.', 'Cristais de Açúcar.', 'Pilha de Limão.'], answer: 'Cristais de Açúcar.', explanation: 'O experimento dos Cristais de Açúcar demonstra como soluções saturadas funcionam e como os cristais se formam por cristalização.', points: 20 },
+            { question: 'Qual é a função do detergente no experimento "Vulcão de Espuma"?', options: ['Reagir com o vinagre para produzir mais gás.', 'Prender as bolhas de gás para formar uma espuma gigante.', 'Dar cor à erupção vulcânica.', 'Acelerar a reação entre o vinagre e o bicarbonato.'], answer: 'Prender as bolhas de gás para formar uma espuma gigante.', explanation: 'O detergente age como uma "armadilha" para o gás carbônico, fazendo com que as bolhas fiquem presas e formem uma espuma gigante.', points: 20 },
+            { question: 'No experimento "Pilha de Limão", qual dos materiais perde elétrons (oxida)?', options: ['O limão.', 'A moeda de cobre.', 'O prego de zinco.', 'O LED pequeno.'], answer: 'O prego de zinco.', explanation: 'No experimento da Pilha de Limão, o prego de zinco perde elétrons (oxida).', points: 20 },
+            // Capítulo 3: A Jornada da Água Limpa (Tratamento de Água) (30 Pontos)
+            { question: 'Qual é a primeira etapa do processo de tratamento da água em uma Estação de Tratamento de Água (ETA)?', options: ['Coagulação.', 'Captação.', 'Floculação.', 'Filtração.'], answer: 'Captação.', explanation: 'A primeira etapa é a captação, onde a água é coletada de rios ou represas e levada até a estação.', points: 30 },
+            { question: 'Na etapa de Coagulação, quais produtos químicos são adicionados à água para que as partículas de sujeira se aglomerem?', options: ['Cloro e flúor.', 'Carvão ativado e areia.', 'Sulfato de alumínio ou sulfato férrico.', 'Hidróxido de cálcio.'], answer: 'Sulfato de alumínio ou sulfato férrico.', explanation: 'Na coagulação, são adicionados produtos químicos como o sulfato de alumínio (ou sulfato férrico), que fazem as partículas de sujeira se aglomerarem.', points: 30 },
+            { question: 'Qual é o objetivo da etapa de Floculação no tratamento da água?', options: ['Eliminar bactérias e vírus.', 'Fazer com que as partículas de sujeira se unam, formando flocos maiores e mais pesados.', 'Ajustar a acidez da água.', 'Remover impurezas menores com filtros.'], answer: 'Fazer com que as partículas de sujeira se unam, formando flocos maiores e mais pesados.', explanation: 'Na floculação, a água é misturada lentamente para que as partículas de sujeira coaguladas se unam, formando flocos maiores e mais pesados, parecidos com "bolinhas de algodão sujas".', points: 30 },
+            { question: 'A etapa de Decantação consiste em:', options: ['Adicionar cloro à água.', 'Deixar a água em repouso em tanques, permitindo que os flocos de sujeira afundem.', 'Passar a água por camadas de areia e cascalho.', 'Coletar a água de rios e represas.'], answer: 'Deixar a água em repouso em tanques, permitindo que os flocos de sujeira afundem.', explanation: 'Na decantação, a água entra em tanques enormes, onde fica em repouso. Os flocos de sujeira, sendo mais pesados, afundam e formam uma camada no fundo.', points: 30 },
+            { question: 'Qual é o papel do carvão ativado na etapa de Filtração?', options: ['Aglomerar as partículas de sujeira.', 'Eliminar germes e bactérias.', 'Remover impurezas pequenas e desodorizar a água.', 'Proteger os dentes das cáries.'], answer: 'Remover impurezas pequenas e desodorizar a água.', explanation: 'A filtração usa várias camadas (areia, cascalho e carvão ativado). O carvão ativado, especificamente, ajuda a remover impurezas menores e desodoriza a água.', points: 30 },
+            { question: 'Na etapa de Desinfecção/Cloração, qual produto é adicionado e com qual finalidade?', options: ['Flúor, para proteger os dentes.', 'Cloro, para eliminar germes e bactérias.', 'Sulfato de alumínio, para aglomerar a sujeira.', 'Hidróxido de cálcio, para ajustar o pH.'], answer: 'Cloro, para eliminar germes e bactérias.', explanation: 'Na desinfecção/cloração, adiciona-se cloro à água para eliminar germes e bactérias, garantindo que ela esteja segura para o consumo.', points: 30 },
+            { question: 'A adição de flúor à água, na etapa de Fluoretação, tem qual benefício principal?', options: ['Desinfetar a água.', 'Tornar a água mais clara.', 'Ajudar a proteger os dentes das cáries.', 'Remover sedimentos.'], answer: 'Ajudar a proteger os dentes das cáries.', explanation: 'Na fluoretação, é adicionado flúor, que ajuda a proteger os nossos dentes das cáries.', points: 30 },
+            { question: 'Qual é a ordem correta das primeiras três etapas do tratamento de água?', options: ['Floculação, Captação, Coagulação.', 'Coagulação, Floculação, Captação.', 'Captação, Coagulação, Floculação.', 'Captação, Floculação, Decantação.'], answer: 'Captação, Coagulação, Floculação.', explanation: 'A ordem correta das primeiras etapas é: 1. Captação, 2. Coagulação, 3. Floculação.', points: 30 },
+            { question: 'Na etapa de Coagulação, o que acontece com as partículas de sujeira?', options: ['Elas são filtradas.', 'Elas se dissolvem.', 'Elas se aglomeram.', 'Elas evaporam.'], answer: 'Elas se aglomeram.', explanation: 'Na coagulação, produtos químicos são adicionados para fazer com que as partículas de sujeira (terra, argila, folhas) se aglomerem.', points: 30 },
+            { question: 'Qual etapa do tratamento de água é um fenômeno químico?', options: ['Decantação.', 'Filtração.', 'Coagulação.', 'Reservação.'], answer: 'Coagulação.', explanation: 'A coagulação é um fenômeno químico, pois envolve a adição de coagulantes químicos que alteram a natureza das partículas de sujeira para que se unam.', points: 30 },
+            { question: 'A etapa de Decantação é classificada como qual tipo de fenômeno?', options: ['Químico, pois os flocos se transformam.', 'Físico, pois os flocos apenas se separam da água por gravidade.', 'Químico, pois o pH da água muda.', 'Físico, pois são adicionados produtos químicos.'], answer: 'Físico, pois os flocos apenas se separam da água por gravidade.', explanation: 'A decantação é um fenômeno físico, pois a água e os flocos de sujeira se separam apenas pela diferença de densidade e ação da gravidade, sem alteração de sua composição química.', points: 30 },
+            { question: 'Qual é a função da etapa de Correção do pH no tratamento da água?', options: ['Eliminar bactérias e vírus.', 'Prevenir cáries dentárias.', 'Ajustar a acidez da água para proteger tubulações e garantir qualidade.', 'Remover partículas sólidas.'], answer: 'Ajustar a acidez da água para proteger tubulações e garantir qualidade.', explanation: 'A correção do pH envolve a adição de hidróxido de cálcio para ajustar a acidez da água, protegendo as tubulações e garantindo a qualidade final.', points: 30 },
+            { question: 'Para onde a água vai depois de ser completamente tratada e potável, antes de chegar às residências?', options: ['De volta para o rio.', 'Para a estação de filtração novamente.', 'Para reservatórios.', 'É imediatamente distribuída sem armazenamento.'], answer: 'Para reservatórios.', explanation: 'A água, agora completamente tratada e potável, é armazenada em reservatórios. De lá, ela é distribuída por uma rede de canos até a torneira.', points: 30 },
+            { question: 'Qual das seguintes etapas de tratamento da água NÃO é um fenômeno químico?', options: ['Coagulação.', 'Floculação.', 'Desinfecção (Cloração).', 'Filtração.'], answer: 'Filtração.', explanation: 'A filtração é um processo físico de separação de misturas, onde impurezas são retidas mecanicamente, sem alteração da composição química da água.', points: 30 },
+            { question: 'Na etapa de Filtração, quais materiais são comumente usados como camadas filtrantes?', options: ['Sulfato de alumínio e cloro.', 'Ácido fluossilícico e hidróxido de cálcio.', 'Areia, cascalho e carvão ativado.', 'Óleo e corante.'], answer: 'Areia, cascalho e carvão ativado.', explanation: 'A água passa por um sistema de filtros que é como uma peneira gigante de várias camadas, como areia, cascalho e carvão ativado.', points: 30 },
+            { question: 'Por que a água precisa passar por um processo de tratamento antes de chegar à nossa torneira?', options: ['Para deixá-la mais saborosa.', 'Para que ela possa ser usada em experimentos.', 'Para remover impurezas, germes e garantir que esteja segura para o consumo.', 'Para torná-la colorida para o uso.'], answer: 'Para remover impurezas, germes e garantir que esteja segura para o consumo.', explanation: 'A água que chega na nossa torneira não é coletada pronta para beber. Ela passa por um processo complexo e superimportante para remover impurezas e germes, garantindo que esteja segura para o consumo (potável).', points: 30 },
+            { question: 'Qual é o nome da estação onde a água é purificada?', options: ['Estação de Coleta de Água (ECA).', 'Estação de Purificação de Água (EPA).', 'Estação de Tratamento de Água (ETA).', 'Estação de Distribuição de Água (EDA).'], answer: 'Estação de Tratamento de Água (ETA).', explanation: 'A água passa por um processo complexo e superimportante em uma Estação de Tratamento de Água (ETA).', points: 30 },
+            { question: 'A etapa de Floculação é considerada um fenômeno químico porque:', options: ['Apenas ocorre a mistura lenta da água.', 'Não há alteração na identidade das partículas.', 'As partículas grudadas se transformam em flocos maiores, alterando sua organização e facilitando a separação.', 'Os flocos afundam devido à gravidade.'], answer: 'As partículas grudadas se transformam em flocos maiores, alterando sua organização e facilitando a separação.', explanation: 'A floculação é considerada um fenômeno químico porque as partículas coaguladas se unem e se transformam em flocos maiores e mais pesados através de um processo de agregação induzido quimicamente, alterando a forma e facilitando sua separação.', points: 30 },
+            // Capítulo 4: Conceitos Gerais e Aplicações (40 Pontos)
+            { question: 'A matéria é tudo o que tem:', options: ['Cor e sabor.', 'Brilho e forma.', 'Massa e ocupa lugar no espaço.', 'Água e ar.'], answer: 'Massa e ocupa lugar no espaço.', explanation: 'A matéria é tudo o que tem massa e ocupa lugar no espaço.', points: 40 },
+            { question: 'Qual é o processo que permite a formação de cristais de açúcar a partir de uma solução saturada?', options: ['Evaporação.', 'Fusão.', 'Cristalização.', 'Condensação.'], answer: 'Cristalização.', explanation: 'O experimento de Cristais de Açúcar demonstra como soluções saturadas funcionam e como os cristais se formam por cristalização.', points: 40 },
+            { question: 'Qual dos seguintes é um exemplo de fenômeno físico que pode ser observado no corpo humano após um banho quente?', options: ['Digestão dos alimentos.', 'Condensação do vapor no espelho.', 'Respiração celular.', 'Crescimento dos cabelos.'], answer: 'Condensação do vapor no espelho.', explanation: 'A condensação do vapor no espelho após um banho quente é uma mudança de estado (vapor para líquido), um fenômeno físico.', points: 40 },
+            { question: 'Quando você tempera um alimento, está realizando qual tipo de fenômeno?', options: ['Fenômeno Químico, pois o sabor muda.', 'Fenômeno Químico, pois há mistura de substâncias.', 'Fenômeno Físico, pois os ingredientes apenas se misturam sem formar novas substâncias.', 'Fenômeno Físico, pois a temperatura do alimento pode mudar.'], answer: 'Fenômeno Físico, pois os ingredientes apenas se misturam sem formar novas substâncias.', explanation: 'Quando você tempera um alimento, está realizando um fenômeno físico, pois os ingredientes apenas se misturam sem formar novas substâncias.', points: 40 },
+            { question: 'A frase "A ciência está em toda parte! Desde a água que você bebe até os alimentos que cozinha, tudo envolve transformações fascinantes da matéria" serve como uma:', options: ['Pergunta.', 'Instrução para um experimento.', 'Conclusão e incentivo ao estudo.', 'Definição de fenômeno.'], answer: 'Conclusão e incentivo ao estudo.', explanation: 'Esta frase aparece como parte da conclusão das apostilas, servindo para resumir a importância da ciência e incentivar a curiosidade contínua.', points: 40 }
+        ];
+
+        // --- FUNÇÕES GERAIS E DE TELA ---
+        function showScreen(screenToShow) {
+            document.querySelectorAll('.screen').forEach(screen => screen.classList.add('hidden'));
+            screenToShow.classList.remove('hidden');
+        }
+
+        function toggleButtonLoader(button, show) {
+            const buttonText = button.querySelector('.button-text');
+            const loader = button.querySelector('.loader');
+            if (buttonText && loader) {
+                buttonText.style.display = show ? 'none' : 'inline';
+                loader.style.display = show ? 'inline-block' : 'none';
+            }
+            button.disabled = show;
+        }
+
+        async function callAppsScript(action, data) {
+            try {
+                const response = await fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'cors',
+                    redirect: 'follow',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8', },
+                    body: JSON.stringify({ action, ...data })
+                });
+                if (!response.ok) { throw new Error(`HTTP error! status: ${response.status}`); }
+                return await response.json();
+            } catch (error) {
+                console.error("Erro ao contatar o Apps Script:", error);
+                return { status: 'error', message: 'Falha de comunicação. Verifique a publicação do script e sua conexão.' };
+            }
+        }
+        
+        function capitalizeName(name) {
+            return name.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+        }
+
+        function handleSuccessfulLogin(userData) {
+            const firstName = userData.name.split(' ')[0];
+            loggedInUser = { ...userData, firstName };
+            sessionStorage.setItem('loggedInUser', JSON.stringify(loggedInUser));
+            playerFirstNameEl.textContent = firstName;
+            showScreen(videoScreen);
+        }
+
+        // --- LÓGICA DE LOGIN E CADASTRO ---
+        loginButton.addEventListener('click', async () => {
+            const code = loginCodeInput.value.trim();
+            const password = loginPasswordInput.value.trim();
+            loginMessage.textContent = '';
+            if (!code || !password) {
+                loginMessage.textContent = 'Preencha o código e a senha.';
+                return;
+            }
+            toggleButtonLoader(loginButton, true);
+            const result = await callAppsScript('login', { code, password });
+            toggleButtonLoader(loginButton, false);
+            if (result.status === 'success') {
+                handleSuccessfulLogin({ name: result.name, code: code, turma: result.turma });
+            } else if (result.status === 'not_found') {
+                loginForm.classList.add('hidden');
+                registerForm.classList.remove('hidden');
+                registerCodeInput.value = code;
+                registerCodeInput.removeAttribute('readonly');
+            } else {
+                loginMessage.textContent = result.message || 'Ocorreu um erro.';
+            }
+        });
+        
+        goToRegisterButton.addEventListener('click', () => {
+            loginForm.classList.add('hidden');
+            registerForm.classList.remove('hidden');
+            loginMessage.textContent = '';
+            registerCodeInput.removeAttribute('readonly');
+            registerCodeInput.value = '';
+        });
+
+        registerButton.addEventListener('click', async () => {
+            const rawName = registerNameInput.value.trim();
+            const turma = registerClassInput.value;
+            const code = registerCodeInput.value.trim();
+            const password = registerPasswordInput.value.trim();
+            registerMessage.textContent = '';
+            if (!rawName || !turma || !code || !password) {
+                registerMessage.textContent = 'Todos os campos são obrigatórios.';
+                return;
+            }
+            const name = capitalizeName(rawName);
+            toggleButtonLoader(registerButton, true);
+            const data = { name, turma, code, password };
+            const result = await callAppsScript('register', data);
+            toggleButtonLoader(registerButton, false);
+            if (result.status === 'success') {
+                handleSuccessfulLogin({ name: name, code: code, turma: turma });
+            } else {
+                registerMessage.textContent = result.message || 'Ocorreu um erro.';
+            }
+        });
+
+        backToLoginButton.addEventListener('click', () => {
+            registerForm.classList.add('hidden');
+            loginForm.classList.remove('hidden');
+            registerMessage.textContent = '';
+        });
+
+        loginPasswordInput.addEventListener('keydown', (e) => { if(e.key === 'Enter') loginButton.click(); });
+        loginCodeInput.addEventListener('keydown', (e) => { if(e.key === 'Enter') loginButton.click(); });
+        registerPasswordInput.addEventListener('keydown', (e) => { if(e.key === 'Enter') registerButton.click(); });
+        registerCodeInput.addEventListener('keydown', (e) => { if(e.key === 'Enter') registerButton.click(); });
+        registerNameInput.addEventListener('keydown', (e) => { if(e.key === 'Enter') registerButton.click(); });
+
+        window.addEventListener('load', () => {
+            const user = sessionStorage.getItem('loggedInUser');
+            if (user) {
+                loggedInUser = JSON.parse(user);
+                playerFirstNameEl.textContent = loggedInUser.firstName;
+                showScreen(videoScreen);
+            } else {
+                showScreen(loginScreen);
+            }
+            updateScoreDisplay();
+        });
+        
+        // --- LÓGICA DO VÍDEO ---
+        let player;
+        let progressCheckInterval;
+        let maxWatchedTime = 0;
+
+        function updateScoreDisplay() {
+            document.querySelectorAll('.score-display').forEach(el => el.textContent = score);
+        }
+
+        function onYouTubeIframeAPIReady() {
+            player = new YT.Player('player', {
+                height: '100%',
+                width: '100%',
+                videoId: '48yyzhAPM80',
+                playerVars: { 'playsinline': 1, 'rel': 0, 'controls': 1 },
+                events: { 'onReady': onPlayerReady, 'onStateChange': onPlayerStateChange }
+            });
+        }
+
+        function onPlayerReady(event) {
+            maxWatchedTime = 0;
+            videoPointsInvalidated = false;
+        }
+
+        function onPlayerStateChange(event) {
+            if (event.data == YT.PlayerState.PLAYING) {
+                clearInterval(progressCheckInterval); 
+                progressCheckInterval = setInterval(() => {
+                    const currentTime = player.getCurrentTime();
+                    const duration = player.getDuration();
+                    const isMuted = player.isMuted();
+                    const playbackRate = player.getPlaybackRate();
+                    const scoreTextEl = videoScreen.querySelector('.score-display').parentElement;
+
+                    if (currentTime > maxWatchedTime + 1.5) {
+                        player.seekTo(maxWatchedTime, true);
+                    } else if (currentTime > maxWatchedTime) {
+                        maxWatchedTime = currentTime;
+                    }
+                    
+                    if (isMuted || playbackRate !== 1) {
+                        videoPointsInvalidated = true;
+                    }
+
+                    if(videoPointsInvalidated) {
+                        score = 0;
+                        scoreTextEl.classList.add('text-red-500');
+                    } else if (duration > 0) {
+                        const potentialScore = (maxWatchedTime / duration) * 1000;
+                        score = Math.floor(potentialScore / 10) * 10;
+                        scoreTextEl.classList.remove('text-red-500');
+                    }
+                    updateScoreDisplay();
+
+                    if ((maxWatchedTime / duration) >= 0.9) {
+                        if (continueBtn.disabled) {
+                            continueBtn.disabled = false;
+                            continueBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                        }
+                    }
+                }, 500);
+            } else {
+                clearInterval(progressCheckInterval);
+            }
+        }
+
+        continueBtn.addEventListener('click', () => {
+            if (!continueBtn.disabled) {
+                showScreen(gameScreen);
+                startGame();
+            }
+        });
+
+        skipVideoBtn.addEventListener('click', () => {
+            score = 0;
+            updateScoreDisplay();
+            showScreen(gameScreen);
+            startGame();
+        });
+
+        // --- LÓGICA DO QUIZ ---
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function startGame() {
+            if(player && typeof player.stopVideo === 'function') {
+                player.stopVideo();
+            }
+            currentQuestionIndex = 0;
+            shuffledQuestions = shuffleArray([...questions]);
+            startTime = new Date();
+            updateScoreDisplay();
+            displayNextQuestion();
+        }
+
+        function displayNextQuestion() {
+            if (currentQuestionIndex >= shuffledQuestions.length) {
+                endGame(true); // Finaliza o jogo se todas as questões foram respondidas
+                return;
+            }
+
+            const currentQuestion = shuffledQuestions[currentQuestionIndex];
+            questionContainer.textContent = currentQuestion.question;
+            optionsContainer.innerHTML = '';
+
+            const shuffledOptions = shuffleArray([...currentQuestion.options]);
+
+            shuffledOptions.forEach(option => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.classList.add('option-button', 'w-full', 'bg-white/10', 'text-white', 'text-lg', 'sm:text-xl', 'font-bold', 'py-4', 'px-2', 'rounded-xl', 'shadow-lg', 'border-violet-400', 'hover:bg-violet-500/30');
+                button.addEventListener('click', handleAnswer);
+                optionsContainer.appendChild(button);
+            });
+        }
+
+        function handleAnswer(e) {
+            const selectedOption = e.target.textContent;
+            const currentQuestion = shuffledQuestions[currentQuestionIndex];
+            const correctAnswer = currentQuestion.answer;
+            const explanation = currentQuestion.explanation;
+
+            optionsContainer.querySelectorAll('button').forEach(btn => btn.disabled = true);
+
+            if (selectedOption === correctAnswer) {
+                score += currentQuestion.points;
+                showFeedback(`+${currentQuestion.points} Pontos! 🎉`, explanation, true);
+                e.target.classList.remove('bg-white/10', 'border-violet-400', 'hover:bg-violet-500/30');
+                e.target.classList.add('bg-green-500', 'border-green-700', 'text-white');
+            } else {
+                const wrongFeedbackMsg = `Ops! A resposta certa é "${correctAnswer}".`;
+                showFeedback(wrongFeedbackMsg, explanation, false);
+                 e.target.classList.remove('bg-white/10', 'border-violet-400', 'hover:bg-violet-500/30');
+                e.target.classList.add('bg-red-500', 'border-red-700', 'text-white');
+            }
+            
+            updateScoreDisplay();
+            currentQuestionIndex++;
+        }
+
+        function showFeedback(message, explanation, isCorrect) {
+            feedbackEl.innerHTML = `
+                <strong class="block text-3xl mb-2">${message}</strong>
+                <span class="text-xl mt-2 block font-normal">${explanation}</span>
+                <button id="feedback-continue-btn" class="mt-6 w-full bg-white/20 text-white font-bold py-3 rounded-xl hover:bg-white/30 transition option-button border-white/30">Continuar →</button>
+            `;
+            
+            const colorClass = isCorrect ? 'bg-gradient-to-br from-green-400 to-emerald-600' : 'bg-gradient-to-br from-red-400 to-rose-600';
+            feedbackEl.className = `fixed z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 p-6 sm:p-8 rounded-2xl text-white text-2xl font-bold shadow-2xl w-11/12 max-w-sm text-center transition-all duration-300 ease-in-out ${colorClass} opacity-0 scale-90`;
+            
+            feedbackEl.classList.remove('pointer-events-none');
+            
+            requestAnimationFrame(() => {
+                feedbackEl.classList.remove('opacity-0', 'scale-90');
+            });
+
+            const hideAndContinue = () => {
+                feedbackEl.classList.add('opacity-0', 'scale-90', 'pointer-events-none');
+                setTimeout(displayNextQuestion, 300); // Wait for animation
+            };
+
+            document.getElementById('feedback-continue-btn').addEventListener('click', hideAndContinue, { once: true });
+        }
+        
+        function getMotivationalMessage(finalScore) {
+            if (finalScore >= 1000) {
+                return "Excelente, " + loggedInUser.firstName + "! Você domina a ciência! 🏆";
+            } else if (finalScore >= 500) {
+                return "Muito bem, " + loggedInUser.firstName + "! Continue praticando para ficar ainda melhor. 👍";
+            } else {
+                return "Não desista, " + loggedInUser.firstName + "! Cada tentativa é um passo para aprender mais. ✨";
+            }
+        }
+        
+        // --- LÓGICA DE FIM DE JOGO E RANKING ---
+        function resetGame() {
+            score = 0;
+            currentQuestionIndex = 0;
+            videoPointsInvalidated = false;
+            maxWatchedTime = 0;
+            startTime = null;
+
+            updateScoreDisplay();
+            
+            if (player && typeof player.seekTo === 'function') {
+                player.seekTo(0, true);
+                player.stopVideo();
+            }
+            
+            continueBtn.disabled = true;
+            continueBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            videoScreen.querySelector('.score-display').parentElement.classList.remove('text-red-500');
+
+            showScreen(videoScreen);
+        }
+
+        async function endGame(allQuestionsAnswered = false) {
+            let finalScore = score;
+            bonusMessageEl.textContent = '';
+            
+            if (allQuestionsAnswered){
+                 finalScore += 500; // Bônus por terminar todas as questões
+                 bonusMessageEl.textContent = `+500 pontos de bônus por terminar o jogo!`;
+            }
+
+            const endTime = new Date();
+            const timeSpent = Math.round((endTime - startTime) / 1000);
+            
+            showScreen(endScreen);
+            endScreenContent.classList.remove('hidden');
+            playAgainButton.classList.remove('hidden');
+            backFromRankingButton.classList.add('hidden');
+            document.getElementById('final-score').textContent = finalScore;
+            finalMessageEl.textContent = getMotivationalMessage(finalScore);
+            
+            const result = await callAppsScript('saveScoreAndGetRanking', { 
+                fullName: loggedInUser.name, 
+                turma: loggedInUser.turma, 
+                score: finalScore, 
+                time: timeSpent,
+                nomeDoJogo: NOME_DESTE_JOGO,
+                code: loggedInUser.code
+            });
+            
+            if (result.status === 'success') {
+                populateRankingTable(result.ranking, loggedInUser.code);
+            } else {
+                document.getElementById('ranking-body').innerHTML = `<tr><td colspan="4" class="p-4 text-center text-red-500">${result.message}</td></tr>`;
+            }
+        }
+        
+        async function displayRanking() {
+            showScreen(endScreen);
+            endScreenContent.classList.add('hidden');
+            playAgainButton.classList.add('hidden');
+            backFromRankingButton.classList.remove('hidden');
+
+            const result = await callAppsScript('getRanking', { nomeDoJogo: NOME_DESTE_JOGO });
+            if (result.status === 'success') {
+                const userCode = loggedInUser ? loggedInUser.code : null;
+                populateRankingTable(result.ranking, userCode);
+            } else {
+                document.getElementById('ranking-body').innerHTML = `<tr><td colspan="4" class="p-4 text-center text-red-500">${result.message}</td></tr>`;
+            }
+        }
+
+        viewRankingButton.addEventListener('click', displayRanking);
+        
+        backFromRankingButton.addEventListener('click', () => {
+            showScreen(loginScreen);
+        });
+
+        function populateRankingTable(ranking, currentUserCode) {
+            const tbody = document.getElementById('ranking-body');
+            tbody.innerHTML = '';
+            if(!ranking || ranking.length === 0){
+                tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center">Ainda não há pontuações. Seja o primeiro!</td></tr>`;
+                return;
+            }
+            ranking.forEach((entry, index) => {
+                const isCurrentUser = currentUserCode && entry.code === currentUserCode;
+                const row = `
+                    <tr class="border-b border-white/10 ${isCurrentUser ? 'bg-yellow-500/30' : ''}">
+                        <td class="p-2 font-bold">${index + 1}</td>
+                        <td class="p-2">${entry.name}</td>
+                        <td class="p-2">${entry.score}</td>
+                        <td class="p-2">${entry.turma}</td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+        }
+
+        playAgainButton.addEventListener('click', resetGame);
+
+    </script>
+</body>
+</html>
+
+
+
